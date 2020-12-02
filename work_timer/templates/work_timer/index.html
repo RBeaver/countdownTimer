@@ -1,0 +1,92 @@
+{% if timer_list %}
+    <input type="hidden" id="timer_list" name="timer_list" value="{{ timer_list }}">
+    <h1>Timers</h1>
+    <div>
+    {% for timer in timer_list %}
+        <div>
+            <p>{{timer.name}}:</p>
+            <p id={{timer.id}}></p>
+            <form action="{% url 'clear' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" value={{timer.id}} name="id">clear</button>
+            </form>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>No current Timers</p>
+{% endif %}
+
+<input type="hidden" id="timer_list" name="timer_list" value="{{ timer_list }}">
+
+
+<h1>Create a Timer</h1>
+<form action="{% url 'create' %}" method="post">
+    {% csrf_token %}
+    <div>
+        <p>Name: <input type="text" name="name"></p>
+        <p>Duration (hh:mm:ss): <input type="number" name="hours" min=0 max=59 value=0>:<input type="number" name="minutes" min=0 max=59 value=0>:<input type="number" name="seconds" min=0 max=59 value=0></p>
+    </div>
+    <button type="submit" value="create">Create and Start Timer</form>button>
+</form>
+
+
+<script type="text/javascript">
+
+    var timers = document.getElementById("timer_list").value;
+
+    console.log(timers.replace(/</g, '').replace(/>/g, '').replace(/datetime.datetime\(/g, '\'').replace(/datetime.time\(/g, '\'').replace(/\)/g, '\'').replace(/django/g, '\'').replace(/, \'id/g, '\', \'id'))
+
+    var jsonObj = eval(timers.replace(/</g, '').replace(/>/g, '').replace(/datetime.datetime\(/g, '\'').replace(/datetime.time\(/g, '\'').replace(/\)/g, '\'').replace(/django/g, '\'').replace(/, \'id/g, '\', \'id'));
+
+    for (var s in jsonObj) {
+        // Set the date we're counting down to
+        
+        var t_array = jsonObj[s].start_time.split(',')
+        var d_arr = jsonObj[s].duration.split(',')
+
+        var setTime
+
+        if(d_arr.length == 2) {
+            setTime = new Date(t_array[0], parseInt(t_array[1]) - 1, t_array[2], parseInt(t_array[3]) + parseInt(d_arr[0]) - 6, parseInt(t_array[4]) + parseInt(d_arr[1]), parseInt(t_array[5]))
+        } else if(d_arr.length == 1) {
+            setTime = new Date(t_array[0], parseInt(t_array[1]) - 1, t_array[2], parseInt(t_array[3]) + parseInt(d_arr[0]) - 6, parseInt(t_array[4]), parseInt(t_array[5]))
+        } else {
+            setTime = new Date(t_array[0], parseInt(t_array[1]) - 1, t_array[2], parseInt(t_array[3]) + parseInt(d_arr[0]) - 6, parseInt(t_array[4]) + parseInt(d_arr[1]), parseInt(t_array[5]) + parseInt(d_arr[2]))
+        }
+
+        console.log(setTime)
+
+        var countDownDate = setTime.getTime();
+        //y, m, d, H, M, S
+        // Update the count down every 1 second
+        var x = setInterval(function() {
+        
+            // Get today's date and time
+            var now = new Date().getTime();
+            
+            // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+            
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // Display the result in the element with id="demo"
+            document.getElementById(jsonObj[s].id).innerHTML = days + "d " + hours + "h "
+            + minutes + "m " + seconds + "s ";
+            
+            // If the count down is finished, write some text
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById(jsonObject[s].id).innerHTML = "EXPIRED";
+            }
+        }, 1000);
+        console.log("Ayy")
+    }
+
+
+
+    </script>
